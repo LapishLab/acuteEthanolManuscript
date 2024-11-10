@@ -8,3 +8,7 @@ ratRNNAcuteEthanol.m does exactly what ratAcuteEthanol.m does,
 except it doesnt generate a mean FR graphs, and correlates each 
 neuron with each animal's respective brain EtOH predicted from 
 the beiRNN instead of from their intake
+
+beiRNNModel generates/trains the model fresh on input data of choice
+
+beiRNNInstanceRuns runs the model with the model instances we already generated/tested
