@@ -1,7 +1,7 @@
 %clear all
 %close all
 
-rnnPred = xlsread('averagePredEnsure.xlsx');
+rnnPred = csvread('averagePredictionsEnsure.csv');
 rnnPred = rnnPred';
 
 %% Interpolate ensure and ethanol intakes

@@ -1,7 +1,8 @@
 %clear all
 %close all
 
-rnnPred = xlsread('rnnPrediction.xlsx');
+rnnPred = csvread('averagePredictionsEtOH.csv');
+rnnPred = rnnPred';
 
 %% Interpolate ensure and ethanol intakes
 idxRnn = linspace(1, size(rnnPred, 1), size(rnnPred, 1));
