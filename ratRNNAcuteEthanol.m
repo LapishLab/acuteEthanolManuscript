@@ -388,6 +388,11 @@ yFDR = 2;
 hold on;
 plot(xFDR, yFDR * ones(size(xFDR)), 'w*', 'MarkerSize', 10);
 
+%% write to csv
+csvwrite('posSpikesEtRNNExp.csv', positiveSpikesDataEt)
+csvwrite('negSpikesEtRNNExp.csv', negativeSpikesDataEt)
+csvwrite('posSpikesEnRNNExp.csv', positiveSpikesDataEn)
+csvwrite('negSpikesEnRNNExp.csv', negativeSpikesDataEn)
 %% Function for fill_between
 function fill_between(x, y1, y2, color, alpha)  
     x = [x, fliplr(x)];
