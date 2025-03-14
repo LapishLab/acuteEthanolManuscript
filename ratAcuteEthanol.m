@@ -415,7 +415,114 @@ xFDR = find(hEn);
 yFDR = 2; 
 hold on;
 plot(xFDR, yFDR * ones(size(xFDR)), 'w*', 'MarkerSize', 10);
+%% Graph mean distances for groups 
+getAnimalDist; %run script which takes distances and attaches animal IDs to them in similar fashion as we have for neurons
+distEt = distEt';%flip them so animals are in rows instead of columns
+distEn = distEn';
 
+% Calculate the mean for columns 1:210 across all animals (rows)
+meanDistEt = mean(distEt(:, 1:210), 1);
+meanDistEn = mean(distEn(:, 1:210), 1);
+
+% Plot the means
+figure;
+plot(meanDistEt, 'r', 'LineWidth', 2); hold on;
+plot(meanDistEn, 'y', 'LineWidth', 2);
+hold off;
+
+% Add labels and legend
+xlabel('Time (minutes)');
+ylabel('Mean Distance (cm)');
+legend('Ensure + EtOH', 'Ensure Only');
+title('Mean Distances');
+grid on;
+
+%% Correlate each neuron with each animals distance traveled
+% For ethanol
+numNeurons = size(animalNumSpikesEt, 1);
+correlDistEt = [];
+
+for iNeuron = 1:numNeurons
+    neuronData = animalNumSpikesEt(iNeuron, 1:210);
+    animalID = animalNumSpikesEt(iNeuron, 211);
+    
+    % Find the corresponding distances data for the current animal
+    matchingRow = find(distEt(:, 211) == animalID, 1);  % Only take the first match
+    
+    % Only proceed if there is a match - rat 16 doesn't have any tracking
+    % recorded so needed to include this so it skips 16
+    if ~isempty(matchingRow)
+        distData = distEt(matchingRow, 1:210);
+
+        % Calculate correlation coefficient and p-value
+        [corrCoeff, pValue] = corrcoef(neuronData, distData);
+            
+        % Append correls
+        correlDistEt = [correlDistEt; corrCoeff(1, 2), pValue(1, 2)];
+    end
+end
+
+% Same but for ensure
+numNeurons = size(animalNumSpikesEn, 1);
+numAnimals = size(distEn, 1);
+
+correlDistEn = []; 
+for iNeuron = 1:numNeurons
+    neuronData = animalNumSpikesEn(iNeuron, 1:210);
+    animalID = animalNumSpikesEn(iNeuron, 211);
+    
+    % Find the corresponding distances data for the current animal
+    matchingRow = find(distEn(:, 211) == animalID, 1);  % Only take the first match
+    
+    % Only proceed if there is a match
+    if ~isempty(matchingRow)
+        distData = distEn(matchingRow, 1:210);
+
+        % Calculate correlation coefficient and p-value
+        [corrCoeff, pValue] = corrcoef(neuronData, distData);
+            
+        % Append correls
+        correlDistEn = [correlDistEn; corrCoeff(1, 2), pValue(1, 2)];
+    end
+end
+%% Find signficant correlations
+%Find and index signficant positive and negative correlations for Ensure
+alpha = 0.05;
+sigPDistEn = correlDistEn(:, 2) < alpha;
+sigR2DistEn = correlDistEn(sigPEn, 1);
+
+posIndDistEn = sigR2DistEn > 0;
+negIndDistEn = sigR2DistEn < 0;
+totalDistInd = length(correlDistEn);
+%Determine percents from the total
+percentPosDistInd = sum(posIndDistEn) / totalDistInd * 100;
+percentNegDistInd = sum(negIndDistEn) / totalDistInd * 100;
+percentNonRespDist = 100 - (percentPosDistInd + percentNegDistInd);
+percentPosNegEnDist = [percentPosDistInd, percentNegDistInd, percentNonRespDist];
+%Graph in a pie chart
+figure;
+subplot(1,2,1);
+pie(percentPosNegEnDist);
+legend({'Positive', 'Negative', 'No Correl'}, 'Location', 'Best');
+title('Correlations for Ensure Only')
+
+%Same as above but with Ethanol
+sigPDistEt = correlDistEt(:, 2) < alpha;
+sigR2DistEt = correlDistEt(sigPEn, 1);
+
+posIndDistEt = sigR2DistEt > 0;
+negIndDistEt = sigR2DistEt < 0;
+totalDistInd = length(correlDistEt);
+%Determine percents from the total
+percentPosDistInd = sum(posIndDistEt) / totalDistInd * 100;
+percentNegDistInd = sum(negIndDistEt) / totalDistInd * 100;
+percentNonRespDist = 100 - (percentPosDistInd + percentNegDistInd);
+percentPosNegEtDist = [percentPosDistInd, percentNegDistInd, percentNonRespDist];
+%Graph in a pie chart
+subplot(1,2,2);
+pie(percentPosNegEtDist);
+legend({'Positive', 'Negative', 'No Correl'}, 'Location', 'Best');
+title('Correlations for Ensure + EtOH')
 %% Function for fill_between
 function fill_between(x, y1, y2, color, alpha)  
     x = [x, fliplr(x)];
